@@ -4,37 +4,497 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#ffffff">
-    <title>Lavori in corso</title>
+    <title>Istruzioni | Roca Vecchia AR</title>
 
     <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
       html,
       body {
         width: 100%;
-        min-height: 100%;
+        height: 100%;
         margin: 0;
+        overflow: hidden;
       }
 
       body {
-        display: grid;
+        display: flex;
+        flex-direction: column;
         min-height: 100vh;
         min-height: 100dvh;
-        padding: 24px;
         background-color: #ffffff;
-        color: #1a1a1a;
+        color: #633500;
         font-family: Arial, Helvetica, sans-serif;
-        place-items: center;
       }
 
-      p {
-        margin: 0;
-        font-size: clamp(1.5rem, 7vw, 2.5rem);
-        font-weight: 700;
+      .page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding-top: max(16px, env(safe-area-inset-top));
+        padding-right: max(16px, env(safe-area-inset-right));
+        padding-left: max(16px, env(safe-area-inset-left));
+      }
+
+      .back-button {
+        display: grid;
+        flex: 0 0 auto;
+        width: 48px;
+        height: 48px;
+        padding: 2px;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        place-items: center;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .back-button img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .back-button:focus-visible {
+        outline: 3px solid #3978c5;
+        outline-offset: 3px;
+      }
+
+      .page-logo {
+        display: block;
+        width: clamp(140px, 42vw, 220px);
+        height: auto;
+      }
+
+      .instructions-content {
+        display: flex;
+        justify-content: center;
+        margin-top: clamp(14px, 3vh, 28px);
+        padding-right: max(16px, env(safe-area-inset-right));
+        padding-left: max(16px, env(safe-area-inset-left));
+      }
+
+      .instructions-box {
+        display: flex;
+        aspect-ratio: 958 / 283;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(8px, 3vw, 28px);
+        width: min(92vw, 700px);
+        padding: 4% 7%;
+        background-image: url("assets/ui/box.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 100% 100%;
         text-align: center;
+      }
+
+      .instructions-title,
+      .instructions-text {
+        margin: 0;
+        font-weight: 400;
+      }
+
+      .instructions-title {
+        font-size: clamp(0.9rem, 3.8vw, 1.8rem);
+        line-height: 1.1;
+      }
+
+      .instructions-text {
+        max-width: 92%;
+        font-size: clamp(0.82rem, 3.5vw, 1.75rem);
+        line-height: 1.12;
+      }
+
+      .instruction-steps {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        justify-content: space-evenly;
+        gap: clamp(8px, 1.5vh, 18px);
+        width: min(84vw, 620px);
+        min-height: 0;
+        margin: clamp(8px, 2vh, 18px) auto;
+        padding: 0;
+        list-style: none;
+      }
+
+      .instruction-step {
+        display: flex;
+        align-items: center;
+        gap: clamp(8px, 2.5vw, 18px);
+        text-align: left;
+      }
+
+      .step-icon {
+        display: block;
+        flex: 0 0 auto;
+        width: clamp(34px, 10vw, 58px);
+        height: auto;
+      }
+
+      .step-copy {
+        min-width: 0;
+      }
+
+      .step-title,
+      .step-text {
+        margin: 0;
+        color: #633500;
+        font-weight: 400;
+      }
+
+      .step-title {
+        font-size: clamp(0.72rem, 3.1vw, 1.25rem);
+        line-height: 1.08;
+      }
+
+      .step-text {
+        margin-top: 2px;
+        font-size: clamp(0.7rem, 3vw, 1.2rem);
+        line-height: 1.12;
+      }
+
+      .page-footer {
+        display: flex;
+        justify-content: center;
+        margin-top: auto;
+        padding-right: max(16px, env(safe-area-inset-right));
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        padding-left: max(16px, env(safe-area-inset-left));
+      }
+
+      .credits-box {
+        display: flex;
+        aspect-ratio: 958 / 283;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(4px, 1.2vw, 10px);
+        width: min(92vw, 700px);
+        padding: 2.5% 5%;
+        background-image: url("assets/ui/box.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 100% 100%;
+        text-align: center;
+      }
+
+      .unisalento-logo {
+        display: block;
+        width: min(34%, 200px);
+        height: auto;
+      }
+
+      .credits-text {
+        max-width: 94%;
+        margin: 0;
+        color: #111111;
+        font-size: clamp(0.7rem, 3vw, 1.4rem);
+        font-style: italic;
+        line-height: 1.12;
+      }
+
+      @media (max-height: 500px) {
+        .page-header {
+          padding-top: max(8px, env(safe-area-inset-top));
+        }
+
+        .back-button {
+          width: 40px;
+          height: 40px;
+        }
+
+        .page-logo {
+          width: clamp(120px, 34vw, 180px);
+        }
+
+        .instructions-content {
+          margin-top: 8px;
+        }
+
+        .instructions-box {
+          gap: 5px;
+          width: min(78vw, 560px);
+        }
+
+        .instructions-title {
+          font-size: clamp(0.7rem, 3vh, 1.1rem);
+        }
+
+        .instructions-text {
+          font-size: clamp(0.65rem, 2.8vh, 1rem);
+        }
+
+        .instruction-steps {
+          gap: 3px;
+          width: min(68vw, 520px);
+          margin: 4px auto;
+        }
+
+        .instruction-step {
+          gap: 6px;
+        }
+
+        .step-icon {
+          width: clamp(24px, 8vh, 38px);
+        }
+
+        .step-title {
+          font-size: clamp(0.55rem, 2.3vh, 0.8rem);
+        }
+
+        .step-text {
+          margin-top: 1px;
+          font-size: clamp(0.53rem, 2.2vh, 0.78rem);
+          line-height: 1.05;
+        }
+
+        .page-footer {
+          padding-bottom: max(8px, env(safe-area-inset-bottom));
+        }
+
+        .credits-box {
+          gap: 3px;
+          width: min(78vw, 560px);
+        }
+
+        .credits-text {
+          font-size: clamp(0.62rem, 2.6vh, 0.95rem);
+        }
+      }
+
+      @media (max-height: 500px) and (orientation: landscape) {
+        .page-header {
+          padding-top: max(4px, env(safe-area-inset-top));
+        }
+
+        .back-button {
+          width: 36px;
+          height: 36px;
+        }
+
+        .page-logo {
+          width: 140px;
+        }
+
+        .instructions-content {
+          margin-top: 4px;
+        }
+
+        .instructions-box,
+        .credits-box {
+          width: min(55vw, 80vh, 380px);
+        }
+
+        .instructions-title {
+          font-size: 0.65rem;
+        }
+
+        .instructions-text {
+          font-size: 0.6rem;
+        }
+
+        .instruction-steps {
+          gap: 2px;
+          width: min(70vw, 540px);
+          margin: 2px auto;
+        }
+
+        .step-icon {
+          width: 30px;
+        }
+
+        .step-title {
+          font-size: 0.55rem;
+        }
+
+        .step-text {
+          font-size: 0.52rem;
+        }
+
+        .page-footer {
+          padding-bottom: max(4px, env(safe-area-inset-bottom));
+        }
+
+        .unisalento-logo {
+          width: 28%;
+        }
+
+        .credits-text {
+          font-size: 0.5rem;
+          line-height: 1;
+        }
       }
     </style>
   </head>
 
   <body>
-    <p>Lavori in corso</p>
+    <header class="page-header">
+      <a class="back-button" href="index.html" aria-label="Torna alla pagina iniziale">
+        <img src="assets/ui/back.png" alt="" width="94" height="94">
+      </a>
+
+      <img
+        class="page-logo"
+        src="assets/ui/Logosmall.png"
+        alt="Roca Vecchia AR"
+        width="359"
+        height="103"
+      >
+    </header>
+
+    <main class="instructions-content">
+      <section class="instructions-box" aria-labelledby="instructions-title">
+        <h1 class="instructions-title" id="instructions-title">ISTRUZIONI</h1>
+        <p class="instructions-text">
+          Scegli il punto d’interesse e scopri le ricostruzioni multimediali.
+        </p>
+      </section>
+    </main>
+
+    <ol class="instruction-steps" aria-label="Procedura per avviare l’esperienza AR">
+      <li class="instruction-step">
+        <img
+          class="step-icon"
+          src="assets/ui/graficaroca.png"
+          alt=""
+          width="79"
+          height="79"
+        >
+        <div class="step-copy">
+          <h2 class="step-title">SELEZIONA IL POI</h2>
+          <p class="step-text">Scegli il percorso tra “Le mura” e “La capanna”</p>
+        </div>
+      </li>
+
+      <li class="instruction-step">
+        <img
+          class="step-icon"
+          src="assets/ui/graficaroca.png"
+          alt=""
+          width="79"
+          height="79"
+        >
+        <div class="step-copy">
+          <h2 class="step-title">INQUADRA LA CORNICE</h2>
+          <p class="step-text">
+            Punta la fotocamera del device sul pannello per avviare il contenuto multimediale
+          </p>
+        </div>
+      </li>
+
+      <li class="instruction-step">
+        <img
+          class="step-icon"
+          src="assets/ui/graficaroca.png"
+          alt=""
+          width="79"
+          height="79"
+        >
+        <div class="step-copy">
+          <h2 class="step-title">VISUALIZZA LA RICOSTRUZIONE</h2>
+          <p class="step-text">
+            Avvia la ricostruzione multimediale in realtà aumentata
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <footer class="page-footer">
+      <section class="credits-box" aria-label="Crediti">
+        <img
+          class="unisalento-logo"
+          src="assets/ui/LogoUnisalento.png"
+          alt="Università del Salento"
+          width="262"
+          height="84"
+        >
+        <p class="credits-text">
+          Ricostruzioni multimediali sviluppate da CETMA con il supporto tecnico scientifico del prof. Teodoro Scarano, Dipartimento di Beni Culturali dell’Università del Salento.
+        </p>
+      </section>
+    </footer>
+
+    <script>
+      const instructionTranslations = {
+        it: {
+          pageTitle: "Istruzioni | Roca Vecchia AR",
+          heading: "ISTRUZIONI",
+          text: "Scegli il punto d’interesse e scopri le ricostruzioni multimediali.",
+          stepsLabel: "Procedura per avviare l’esperienza AR",
+          steps: [
+            {
+              title: "SELEZIONA IL POI",
+              text: "Scegli il percorso tra “Le mura” e “La capanna”"
+            },
+            {
+              title: "INQUADRA LA CORNICE",
+              text: "Punta la fotocamera del device sul pannello per avviare il contenuto multimediale"
+            },
+            {
+              title: "VISUALIZZA LA RICOSTRUZIONE",
+              text: "Avvia la ricostruzione multimediale in realtà aumentata"
+            }
+          ],
+          credits: "Ricostruzioni multimediali sviluppate da CETMA con il supporto tecnico scientifico del prof. Teodoro Scarano, Dipartimento di Beni Culturali dell’Università del Salento."
+        },
+        en: {
+          pageTitle: "Instructions | Roca Vecchia AR",
+          heading: "INSTRUCTION",
+          text: "Choose the point of interest and discover the multimedia reconstructions...",
+          stepsLabel: "How to start the AR experience",
+          steps: [
+            {
+              title: "SELECT THE POI",
+              text: "Choose between the “The Walls” and “The Hut” routes."
+            },
+            {
+              title: "FRAME THE MARKER",
+              text: "Scan the panel with your device camera to start the multimedia content."
+            },
+            {
+              title: "VIEW THE RECONSTRUCTION",
+              text: "Start the AR multimedia reconstruction"
+            }
+          ],
+          credits: "Multimedia reconstructions developed by CETMA with technical and scientific support from Prof. Teodoro Scarano of the Department of Cultural Heritage, University of Salento."
+        }
+      };
+
+      function applySelectedLanguage() {
+        let language = "it";
+
+        try {
+          language = localStorage.getItem("preferredLanguage") === "en" ? "en" : "it";
+        } catch (error) {
+          console.warn("Impossibile leggere la lingua salvata.", error);
+        }
+
+        const content = instructionTranslations[language];
+
+        document.documentElement.lang = language;
+        document.title = content.pageTitle;
+        document.querySelector(".instructions-title").textContent = content.heading;
+        document.querySelector(".instructions-text").textContent = content.text;
+        document.querySelector(".instruction-steps").setAttribute("aria-label", content.stepsLabel);
+
+        document.querySelectorAll(".instruction-step").forEach((step, index) => {
+          step.querySelector(".step-title").textContent = content.steps[index].title;
+          step.querySelector(".step-text").textContent = content.steps[index].text;
+        });
+
+        document.querySelector(".credits-text").textContent = content.credits;
+      }
+
+      applySelectedLanguage();
+    </script>
   </body>
 </html>
