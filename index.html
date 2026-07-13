@@ -155,6 +155,17 @@
         outline-offset: 5px;
       }
 
+      .ar-actions--grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, auto));
+        justify-content: center;
+        max-width: min(86vw, 560px);
+      }
+
+      .ar-actions--grid .ar-button {
+        width: min(38vw, 200px);
+      }
+
       .site-footer {
         display: flex;
         justify-content: center;
@@ -238,6 +249,17 @@
           width: min(34vw, 20dvh, 145px);
         }
 
+        .ar-actions--grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          width: min(74vw, 340px);
+          gap: clamp(4px, 1vh, 8px) clamp(6px, 2vw, 12px);
+        }
+
+        .ar-actions--grid .ar-button {
+          width: min(30vw, 16vh, 120px);
+          width: min(30vw, 16dvh, 120px);
+        }
+
         .site-footer {
           flex: 0 0 auto;
           padding-right: max(12px, env(safe-area-inset-right));
@@ -295,6 +317,16 @@
         .ar-button {
           width: min(22vw, 15vh, 110px);
           width: min(22vw, 15dvh, 110px);
+        }
+
+        .ar-actions--grid {
+          width: min(52vw, 330px);
+          gap: 2px 6px;
+        }
+
+        .ar-actions--grid .ar-button {
+          width: min(16vw, 14vh, 96px);
+          width: min(16vw, 14dvh, 96px);
         }
 
         .site-footer {
@@ -360,35 +392,7 @@
         leggi di più -&gt;
       </a>
 
-      <div class="ar-actions" aria-label="Esperienze AR">
-        <a
-          class="ar-button"
-          href="ar.html?target=mura"
-          aria-label="Avvia l'esperienza AR delle mura"
-        >
-          <img
-            src="assets/ui/Mura_it.png"
-            alt="Mura"
-            width="341"
-            height="425"
-            data-ar-image="walls"
-          >
-        </a>
-
-        <a
-          class="ar-button"
-          href="ar.html?target=capanna"
-          aria-label="Avvia l'esperienza AR della capanna"
-        >
-          <img
-            src="assets/ui/Capanna_it.png"
-            alt="Capanna"
-            width="342"
-            height="414"
-            data-ar-image="hut"
-          >
-        </a>
-      </div>
+      <div class="ar-actions" aria-label="Esperienze AR"></div>
     </main>
 
     <footer class="site-footer">
@@ -403,75 +407,182 @@
 
     <script>
       const languageButtons = document.querySelectorAll("[data-language]");
+      const arActions = document.querySelector(".ar-actions");
+      const fallbackPois = [
+        {
+          id: "mura",
+          enabled: true,
+          targetIndex: 0,
+          thumbnail: {
+            it: "assets/ui/Mura_it.png",
+            en: "assets/ui/Wall_en.png"
+          },
+          title: {
+            it: "Le mura",
+            en: "The Walls"
+          },
+          video: "assets/videos/Mura.mp4",
+          audio: {
+            it: "assets/audio/mura_it.mp3",
+            en: "assets/audio/mura_en.mp3"
+          }
+        },
+        {
+          id: "capanna",
+          enabled: true,
+          targetIndex: 1,
+          thumbnail: {
+            it: "assets/ui/Capanna_it.png",
+            en: "assets/ui/Hut_en.png"
+          },
+          title: {
+            it: "La capanna",
+            en: "The Hut"
+          },
+          video: "assets/videos/Capanna.mp4",
+          audio: {
+            it: "assets/audio/capanna_it.mp3",
+            en: "assets/audio/capanna_en.mp3"
+          }
+        }
+      ];
+      let pois = [];
+      let currentLanguage = "it";
       const translations = {
         it: {
           introText:
             "Scegli il punto di interesse e scopri le ricostruzioni multimediali ...",
           readMore: "leggi di più ->",
-          arButtons: {
-            walls: {
-              src: "assets/ui/Mura_it.png",
-              alt: "Mura",
-              label: "Avvia l'esperienza AR delle mura"
-            },
-            hut: {
-              src: "assets/ui/Capanna_it.png",
-              alt: "Capanna",
-              label: "Avvia l'esperienza AR della capanna"
-            }
-          }
+          arLabel: "Avvia l'esperienza AR"
         },
         en: {
           introText:
             "Choose a point of interest and discover the multimedia reconstructions ...",
           readMore: "read more ->",
-          arButtons: {
-            walls: {
-              src: "assets/ui/Wall_en.png",
-              alt: "Walls",
-              label: "Start the walls AR experience"
-            },
-            hut: {
-              src: "assets/ui/Hut_en.png",
-              alt: "Hut",
-              label: "Start the hut AR experience"
-            }
-          }
+          arLabel: "Start the AR experience"
         }
       };
 
+      function getLocalizedValue(value, language) {
+        if (!value) {
+          return "";
+        }
+
+        if (typeof value === "string") {
+          return value;
+        }
+
+        return value[language] || value.it || value.en || "";
+      }
+
+      function getEnabledPois(data) {
+        const list = data && Array.isArray(data.pois) ? data.pois : [];
+
+        return list.filter((poi) => poi && poi.id && poi.enabled !== false);
+      }
+
+      function createArButton(poi, language) {
+        const title = getLocalizedValue(poi.title, language) || poi.id;
+        const thumbnail = getLocalizedValue(poi.thumbnail, language);
+        const audio = getLocalizedValue(poi.audio, language);
+        const params = new URLSearchParams({ target: poi.id });
+        const link = document.createElement("a");
+        const image = document.createElement("img");
+
+        link.className = "ar-button";
+        link.href = `ar.html?${params.toString()}`;
+        link.setAttribute(
+          "aria-label",
+          `${translations[language].arLabel}: ${title}`
+        );
+        link.dataset.poiId = poi.id;
+
+        if (poi.targetIndex !== undefined && poi.targetIndex !== null) {
+          link.dataset.targetIndex = poi.targetIndex;
+        }
+
+        if (poi.video) {
+          link.dataset.video = poi.video;
+        }
+
+        if (audio) {
+          link.dataset.audio = audio;
+        }
+
+        image.src = thumbnail;
+        image.alt = title;
+        image.decoding = "async";
+
+        link.appendChild(image);
+
+        return link;
+      }
+
+      function renderArButtons(language) {
+        const visiblePois = pois.filter((poi) =>
+          Boolean(getLocalizedValue(poi.thumbnail, language))
+        );
+        const fragment = document.createDocumentFragment();
+
+        arActions.textContent = "";
+        arActions.classList.toggle("ar-actions--grid", visiblePois.length > 2);
+
+        visiblePois.forEach((poi) => {
+          fragment.appendChild(createArButton(poi, language));
+        });
+
+        arActions.appendChild(fragment);
+      }
+
       function selectLanguage(language) {
-        document.documentElement.lang = language;
+        currentLanguage = translations[language] ? language : "it";
+        document.documentElement.lang = currentLanguage;
 
         languageButtons.forEach((button) => {
           button.setAttribute(
             "aria-pressed",
-            String(button.dataset.language === language)
+            String(button.dataset.language === currentLanguage)
           );
         });
 
         document.querySelectorAll("[data-i18n]").forEach((element) => {
-          element.textContent = translations[language][element.dataset.i18n];
+          element.textContent =
+            translations[currentLanguage][element.dataset.i18n];
         });
 
-        document.querySelectorAll("[data-ar-image]").forEach((image) => {
-          const content =
-            translations[language].arButtons[image.dataset.arImage];
-
-          image.src = content.src;
-          image.alt = content.alt;
-          image.closest(".ar-button").setAttribute("aria-label", content.label);
-        });
+        renderArButtons(currentLanguage);
 
         try {
-          localStorage.setItem("preferredLanguage", language);
+          localStorage.setItem("preferredLanguage", currentLanguage);
         } catch (error) {
           console.warn("Impossibile salvare la lingua selezionata.", error);
         }
 
         document.dispatchEvent(
-          new CustomEvent("languagechange", { detail: { language } })
+          new CustomEvent("languagechange", {
+            detail: { language: currentLanguage }
+          })
         );
+      }
+
+      async function loadPois() {
+        try {
+          const response = await fetch("data/pois.json", { cache: "no-cache" });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          pois = getEnabledPois(await response.json());
+        } catch (error) {
+          console.warn(
+            "Impossibile caricare data/pois.json. Uso i POI locali di fallback.",
+            error
+          );
+          pois = fallbackPois;
+        }
+
+        renderArButtons(currentLanguage);
       }
 
       languageButtons.forEach((button) => {
@@ -484,11 +595,14 @@
         const savedLanguage = localStorage.getItem("preferredLanguage");
 
         if (savedLanguage === "it" || savedLanguage === "en") {
-          selectLanguage(savedLanguage);
+          currentLanguage = savedLanguage;
         }
       } catch (error) {
         console.warn("Impossibile leggere la lingua salvata.", error);
       }
+
+      selectLanguage(currentLanguage);
+      loadPois();
     </script>
   </body>
 </html>
