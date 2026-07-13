@@ -41,9 +41,9 @@
         align-items: flex-end;
         justify-content: space-between;
         gap: 16px;
-        padding-top: max(12px, env(safe-area-inset-top));
-        padding-right: max(12px, env(safe-area-inset-right));
-        padding-left: max(12px, env(safe-area-inset-left));
+        padding-top: max(4px, env(safe-area-inset-top));
+        padding-right: max(8px, env(safe-area-inset-right));
+        padding-left: max(4px, env(safe-area-inset-left));
         pointer-events: none;
       }
 
@@ -81,25 +81,25 @@
 
       .status-panel {
         position: fixed;
-        right: max(16px, env(safe-area-inset-right));
-        bottom: max(24px, env(safe-area-inset-bottom));
-        left: max(16px, env(safe-area-inset-left));
+        right: max(8px, env(safe-area-inset-right));
+        bottom: max(6px, env(safe-area-inset-bottom));
+        left: max(8px, env(safe-area-inset-left));
         z-index: 10;
         display: grid;
-        gap: 12px;
+        gap: 8px;
         justify-items: center;
         pointer-events: none;
       }
 
       .status-message {
-        max-width: min(92vw, 560px);
+        max-width: min(86vw, 480px);
         margin: 0;
-        padding: 12px 16px;
+        padding: 8px 12px;
         border-radius: 999px;
         background: rgba(0, 0, 0, 0.72);
         color: #ffffff;
-        font-size: clamp(0.95rem, 3.8vw, 1.1rem);
-        line-height: 1.35;
+        font-size: clamp(0.82rem, 3.2vh, 0.95rem);
+        line-height: 1.2;
         text-align: center;
       }
 
@@ -180,6 +180,13 @@
       .start-button:focus-visible {
         outline: 3px solid #ffffff;
         outline-offset: 3px;
+      }
+
+      .a-enter-vr,
+      .a-enter-vr-button {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
       }
 
       a-scene {
