@@ -233,12 +233,35 @@
         border-color: var(--ar-accent) !important;
       }
 
+      .mindar-ui-scanning .scanning {
+        align-items: center !important;
+        display: flex !important;
+        justify-content: center !important;
+      }
+
+      .mindar-ui-scanning .scanning .inner {
+        width: min(76vw, 108.6vh) !important;
+        width: min(76vw, 108.6dvh) !important;
+        height: auto !important;
+        max-height: 78vh !important;
+        max-height: 78dvh !important;
+        aspect-ratio: 4194 / 3012 !important;
+        overflow: hidden !important;
+      }
+
       .mindar-ui-scanning .scanning .inner > div,
       .mindar-ui-scanning .scanning .inner .scanline,
       .mindar-ui-scanning .scanning .inner .scanline::before,
       .mindar-ui-scanning .scanning .inner .scanline::after {
         background-color: var(--ar-accent) !important;
         box-shadow: 0 0 12px rgba(242, 161, 0, 0.65) !important;
+      }
+
+      .mindar-ui-scanning .scanning .inner > div,
+      .mindar-ui-scanning .scanning .inner .scanline {
+        left: 0 !important;
+        right: auto !important;
+        width: 100% !important;
       }
 
       .mindar-ui-scanning .scanning .inner {
