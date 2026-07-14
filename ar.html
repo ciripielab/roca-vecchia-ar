@@ -204,7 +204,7 @@
         background: transparent !important;
       }
 
-      video {
+      video:not(.ar-content-video) {
         position: fixed !important;
         inset: 0 !important;
         z-index: 0 !important;
@@ -213,6 +213,17 @@
         height: 100dvh !important;
         object-fit: cover !important;
         background: transparent !important;
+      }
+
+      .ar-content-video {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        z-index: -1 !important;
+        width: 1px !important;
+        height: 1px !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
       }
 
       .mindar-ui-scanning .scanning .inner,
@@ -287,6 +298,7 @@
       device-orientation-permission-ui="enabled: false"
       loading-screen="enabled: false"
     >
+      <a-assets id="ar-assets" timeout="10000"></a-assets>
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
       <a-entity id="selected-target"></a-entity>
     </a-scene>
