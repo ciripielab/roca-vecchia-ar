@@ -6,6 +6,10 @@ const fallbackPois = [
     enabled: true,
     targetIndex: 0,
     video: "assets/videos/Mura.mp4",
+    audio: {
+      it: "assets/audio/mura_it.mp3",
+      en: "assets/audio/mura_en.mp3"
+    },
     title: {
       it: "Le mura",
       en: "The Walls"
@@ -16,6 +20,10 @@ const fallbackPois = [
     enabled: true,
     targetIndex: 1,
     video: "assets/videos/Capanna.mp4",
+    audio: {
+      it: "assets/audio/capanna_it.mp3",
+      en: "assets/audio/capanna_en.mp3"
+    },
     title: {
       it: "La capanna",
       en: "The Hut"
@@ -90,6 +98,10 @@ let orientationBlocked = false;
 let arStarted = false;
 let poiVideo = null;
 let poiVideoPlane = null;
+let poiAudio = null;
+let poiAudioPrimed = false;
+let poiAudioStarted = false;
+let audioStartTimer = 0;
 
 function getLocalizedValue(value, currentLanguage) {
   if (!value) {
@@ -149,6 +161,23 @@ function makeSafeId(value) {
   return String(value || "poi").replace(/[^a-z0-9_-]/gi, "-");
 }
 
+function clearPoiAudioTimer() {
+  if (!audioStartTimer) {
+    return;
+  }
+
+  window.clearTimeout(audioStartTimer);
+  audioStartTimer = 0;
+}
+
+function pausePoiAudio() {
+  clearPoiAudioTimer();
+
+  if (poiAudio) {
+    poiAudio.pause();
+  }
+}
+
 function pausePoiVideo() {
   if (poiVideoPlane) {
     poiVideoPlane.setAttribute("visible", "false");
@@ -157,6 +186,44 @@ function pausePoiVideo() {
   if (poiVideo) {
     poiVideo.pause();
   }
+}
+
+async function startPoiAudio() {
+  if (!poiAudio) {
+    return;
+  }
+
+  if (poiAudio.ended) {
+    poiAudio.currentTime = 0;
+    poiAudioStarted = false;
+  }
+
+  try {
+    poiAudio.muted = false;
+    poiAudio.volume = 1;
+    await poiAudio.play();
+    poiAudioStarted = true;
+  } catch (error) {
+    console.warn("Impossibile riprodurre l'audio AR.", error);
+  }
+}
+
+function schedulePoiAudioStart() {
+  if (!poiAudio) {
+    return;
+  }
+
+  clearPoiAudioTimer();
+
+  if (poiAudioStarted && !poiAudio.ended) {
+    startPoiAudio();
+    return;
+  }
+
+  audioStartTimer = window.setTimeout(() => {
+    audioStartTimer = 0;
+    startPoiAudio();
+  }, 2000);
 }
 
 async function playPoiVideo() {
@@ -172,9 +239,39 @@ async function playPoiVideo() {
     await poiVideo.play();
     poiVideoPlane.setAttribute("src", `#${poiVideo.id}`);
     poiVideoPlane.setAttribute("visible", "true");
+    schedulePoiAudioStart();
   } catch (error) {
     console.warn("Impossibile riprodurre il video AR.", error);
   }
+}
+
+function configureAudioTrack(safePoiId) {
+  const audioSource = getLocalizedValue(selectedPoi.audio, language);
+
+  if (!audioSource) {
+    return;
+  }
+
+  poiAudio = document.createElement("audio");
+  poiAudio.id = `poi-audio-${safePoiId}`;
+  poiAudio.src = audioSource;
+  poiAudio.preload = "auto";
+  poiAudio.setAttribute("preload", "auto");
+
+  poiAudio.addEventListener("canplay", () => {
+    console.log("Audio AR pronto", audioSource);
+  });
+
+  poiAudio.addEventListener("ended", () => {
+    poiAudioStarted = false;
+  });
+
+  poiAudio.addEventListener("error", () => {
+    console.warn("Errore caricamento audio AR", audioSource, poiAudio.error);
+  });
+
+  (arAssets || document.body).appendChild(poiAudio);
+  poiAudio.load();
 }
 
 function configureVideoFrame() {
@@ -223,6 +320,30 @@ function configureVideoFrame() {
   (arAssets || sceneEl).appendChild(poiVideo);
   targetEl.appendChild(poiVideoPlane);
   poiVideo.load();
+  configureAudioTrack(safePoiId);
+}
+
+async function primePoiAudio() {
+  if (!poiAudio || poiAudioPrimed) {
+    return;
+  }
+
+  const originalMuted = poiAudio.muted;
+  const originalVolume = poiAudio.volume;
+
+  try {
+    poiAudio.muted = true;
+    poiAudio.volume = 0;
+    await poiAudio.play();
+    poiAudio.pause();
+    poiAudio.currentTime = 0;
+    poiAudioPrimed = true;
+  } catch (error) {
+    console.warn("Impossibile preparare l'audio AR.", error);
+  } finally {
+    poiAudio.muted = originalMuted;
+    poiAudio.volume = originalVolume;
+  }
 }
 
 function isMobileLikeDevice() {
@@ -260,6 +381,7 @@ function stopARForOrientation() {
   }
 
   pausePoiVideo();
+  pausePoiAudio();
 
   try {
     arSystem.stop();
@@ -371,6 +493,7 @@ function configureTarget() {
     console.log("Target perso", selectedPoi);
     setStatus("targetLost");
     pausePoiVideo();
+    pausePoiAudio();
   });
 }
 
@@ -439,6 +562,7 @@ startButton.addEventListener("click", async () => {
   setStatus("cameraStarting");
 
   try {
+    await primePoiAudio();
     await arSystem.start();
     arStarted = true;
   } catch (error) {
