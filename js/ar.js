@@ -84,8 +84,8 @@ const orientationMessage = document.querySelector("#orientation-message");
 const arAssets = document.querySelector("#ar-assets");
 const params = new URLSearchParams(window.location.search);
 const defaultVideoFrame = {
-  width: 0.90,
-  height: 0.506,
+  width: 1.00,
+  height: 0.5625,
   x: 0,
   y: 0,
   z: -0.20
