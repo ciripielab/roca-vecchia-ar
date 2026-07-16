@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>Roca Vecchia AR</title>
+
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+      :root {
+        --ar-accent: #f2a100;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #000000;
+        color: #ffffff;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .ar-ui {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 10;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        padding-top: max(4px, env(safe-area-inset-top));
+        padding-right: max(8px, env(safe-area-inset-right));
+        padding-left: max(4px, env(safe-area-inset-left));
+        pointer-events: none;
+      }
+
+      .back-button,
+      .start-button {
+        pointer-events: auto;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .back-button {
+        display: grid;
+        flex: 0 0 auto;
+        width: 40px;
+        height: 40px;
+        padding: 1px;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        place-items: center;
+      }
+
+      .back-button img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .page-logo {
+        display: block;
+        width: clamp(112px, 24vw, 160px);
+        height: auto;
+        pointer-events: none;
+      }
+
+      .status-panel {
+        position: fixed;
+        right: max(8px, env(safe-area-inset-right));
+        bottom: max(6px, env(safe-area-inset-bottom));
+        left: max(8px, env(safe-area-inset-left));
+        z-index: 10;
+        display: grid;
+        gap: 8px;
+        justify-items: center;
+        pointer-events: none;
+      }
+
+      .status-message {
+        max-width: min(86vw, 480px);
+        margin: 0;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.72);
+        color: #ffffff;
+        font-size: clamp(0.82rem, 3.2vh, 0.95rem);
+        line-height: 1.2;
+        text-align: center;
+      }
+
+      .orientation-lock {
+        position: fixed;
+        inset: 0;
+        z-index: 30;
+        display: grid;
+        padding: max(24px, env(safe-area-inset-top))
+          max(24px, env(safe-area-inset-right))
+          max(24px, env(safe-area-inset-bottom))
+          max(24px, env(safe-area-inset-left));
+        background: rgba(0, 0, 0, 0.92);
+        color: #ffffff;
+        place-items: center;
+        text-align: center;
+      }
+
+      .orientation-lock[hidden] {
+        display: none;
+      }
+
+      .orientation-card {
+        display: grid;
+        gap: 14px;
+        justify-items: center;
+        max-width: min(86vw, 420px);
+        padding: 24px;
+        border: 2px solid var(--ar-accent);
+        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.55);
+      }
+
+      .orientation-icon {
+        display: block;
+        width: 56px;
+        height: auto;
+      }
+
+      .orientation-title,
+      .orientation-message {
+        margin: 0;
+      }
+
+      .orientation-title {
+        color: var(--ar-accent);
+        font-size: clamp(1.2rem, 6vw, 1.7rem);
+        font-weight: 700;
+      }
+
+      .orientation-message {
+        font-size: clamp(0.95rem, 4vw, 1.15rem);
+        line-height: 1.35;
+      }
+
+      .start-button {
+        min-width: 160px;
+        padding: 12px 18px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--ar-accent);
+        color: #ffffff;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+
+      .start-button[hidden] {
+        display: none;
+      }
+
+      .start-button:disabled {
+        cursor: wait;
+        opacity: 0.7;
+      }
+
+      .back-button:focus-visible,
+      .start-button:focus-visible {
+        outline: 3px solid #ffffff;
+        outline-offset: 3px;
+      }
+
+      .a-enter-vr,
+      .a-enter-vr-button {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      a-scene {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        background: transparent !important;
+      }
+
+      canvas.a-canvas {
+        z-index: 2 !important;
+        background: transparent !important;
+      }
+
+      video:not(.ar-content-video) {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        object-fit: cover !important;
+        background: transparent !important;
+      }
+
+      .ar-content-video {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        z-index: -1 !important;
+        width: 1px !important;
+        height: 1px !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+
+      .mindar-ui-scanning .scanning .inner,
+      .mindar-ui-scanning .scanning .inner::before,
+      .mindar-ui-scanning .scanning .inner::after,
+      .mindar-ui-scanning .scanning .inner * {
+        border-color: var(--ar-accent) !important;
+      }
+
+      .mindar-ui-scanning .scanning {
+        align-items: center !important;
+        display: flex !important;
+        justify-content: center !important;
+      }
+
+      .mindar-ui-scanning .scanning .inner {
+        width: min(76vw, 108.6vh) !important;
+        width: min(76vw, 108.6dvh) !important;
+        height: auto !important;
+        max-height: 78vh !important;
+        max-height: 78dvh !important;
+        aspect-ratio: 4194 / 3012 !important;
+        overflow: hidden !important;
+      }
+
+      .mindar-ui-scanning .scanning .inner > div,
+      .mindar-ui-scanning .scanning .inner .scanline,
+      .mindar-ui-scanning .scanning .inner .scanline::before,
+      .mindar-ui-scanning .scanning .inner .scanline::after {
+        background-color: var(--ar-accent) !important;
+        box-shadow: 0 0 12px rgba(242, 161, 0, 0.65) !important;
+      }
+
+      .mindar-ui-scanning .scanning .inner > div,
+      .mindar-ui-scanning .scanning .inner .scanline {
+        left: 0 !important;
+        right: auto !important;
+        width: 100% !important;
+      }
+
+      .mindar-ui-scanning .scanning .inner {
+        box-shadow: 0 0 0 1px rgba(242, 161, 0, 0.25) !important;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="ar-ui">
+      <a class="back-button" href="index.html" aria-label="Torna alla pagina iniziale">
+        <img src="assets/ui/back.png" alt="" width="94" height="94">
+      </a>
+
+      <img
+        class="page-logo"
+        src="assets/ui/Logosmall.png"
+        alt="Roca Vecchia AR"
+        width="359"
+        height="103"
+      >
+    </div>
+
+    <div class="status-panel" aria-live="polite">
+      <p class="status-message" id="status-message">
+        Preparazione esperienza AR...
+      </p>
+      <button class="start-button" id="start-button" type="button" disabled>
+        Avvia camera
+      </button>
+    </div>
+
+    <div class="orientation-lock" id="orientation-lock" hidden>
+      <div class="orientation-card">
+        <img
+          class="orientation-icon"
+          src="assets/ui/graficaroca.png"
+          alt=""
+          width="79"
+          height="79"
+        >
+        <p class="orientation-title" id="orientation-title">
+          Ruota il dispositivo
+        </p>
+        <p class="orientation-message" id="orientation-message">
+          Per usare l’esperienza AR, tieni il telefono in orizzontale.
+        </p>
+      </div>
+    </div>
+
+    <a-scene
+      id="ar-scene"
+      mindar-image="imageTargetSrc: assets/targets/targets.mind; autoStart: false;"
+      color-space="sRGB"
+      renderer="colorManagement: true, physicallyCorrectLights; alpha: true"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+      loading-screen="enabled: false"
+    >
+      <a-assets id="ar-assets" timeout="10000"></a-assets>
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <a-entity id="selected-target"></a-entity>
+    </a-scene>
+
+    <script src="js/ar.js"></script>
+  </body>
+</html>
