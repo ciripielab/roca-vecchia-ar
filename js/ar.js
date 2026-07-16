@@ -143,7 +143,21 @@ function formatMessage(key, detail = "") {
     .replace("{detail}", detail || "-");
 }
 
+const hiddenStatusKeys = new Set([
+  "cameraReady",
+  "targetConfigured",
+  "targetFound",
+  "targetLost"
+]);
+
 function setStatus(key, detail = "") {
+  if (hiddenStatusKeys.has(key)) {
+    statusMessage.textContent = "";
+    statusMessage.hidden = true;
+    return;
+  }
+
+  statusMessage.hidden = false;
   statusMessage.textContent = formatMessage(key, detail);
 }
 
