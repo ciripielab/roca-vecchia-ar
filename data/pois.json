@@ -12,7 +12,7 @@
         "it": "Le mura",
         "en": "The Walls"
       },
-      "video": "assets/videos/Mura.mp4",
+      "video": "assets/videos/Mura_mobile.mp4",
       "audio": {
         "it": "assets/audio/mura_it.mp3",
         "en": "assets/audio/mura_en.mp3"
@@ -30,7 +30,7 @@
         "it": "La capanna",
         "en": "The Hut"
       },
-      "video": "assets/videos/Capanna.mp4",
+      "video": "assets/videos/Capanna_mobile.mp4",
       "audio": {
         "it": "assets/audio/capanna_it.mp3",
         "en": "assets/audio/capanna_en.mp3"

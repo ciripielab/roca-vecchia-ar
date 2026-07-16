@@ -132,14 +132,14 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: clamp(18px, 4vh, 32px);
+        gap: clamp(20px, 4.5vh, 36px);
         width: 100%;
-        margin-top: clamp(28px, 6vh, 56px);
+        margin-top: clamp(44px, 8vh, 76px);
       }
 
       .ar-button {
         display: block;
-        width: min(68vw, 260px);
+        width: min(76vw, 310px);
         border-radius: 12px;
         -webkit-tap-highlight-color: transparent;
       }
@@ -163,7 +163,7 @@
       }
 
       .ar-actions--grid .ar-button {
-        width: min(38vw, 200px);
+        width: min(42vw, 230px);
       }
 
       .site-footer {
@@ -240,13 +240,13 @@
         }
 
         .ar-actions {
-          gap: clamp(4px, 1vh, 8px);
-          margin-top: clamp(4px, 1vh, 8px);
+          gap: clamp(8px, 1.8vh, 14px);
+          margin-top: clamp(16px, 3vh, 28px);
         }
 
         .ar-button {
-          width: min(34vw, 20vh, 145px);
-          width: min(34vw, 20dvh, 145px);
+          width: min(46vw, 26vh, 185px);
+          width: min(46vw, 26dvh, 185px);
         }
 
         .ar-actions--grid {
@@ -256,8 +256,8 @@
         }
 
         .ar-actions--grid .ar-button {
-          width: min(30vw, 16vh, 120px);
-          width: min(30vw, 16dvh, 120px);
+          width: min(42vw, 23vh, 170px);
+          width: min(42vw, 23dvh, 170px);
         }
 
         .site-footer {
@@ -311,12 +311,12 @@
 
         .ar-actions {
           gap: 2px;
-          margin-top: 2px;
+          margin-top: clamp(8px, 2vh, 14px);
         }
 
         .ar-button {
-          width: min(22vw, 15vh, 110px);
-          width: min(22vw, 15dvh, 110px);
+          width: min(30vw, 21vh, 145px);
+          width: min(30vw, 21dvh, 145px);
         }
 
         .ar-actions--grid {
@@ -325,8 +325,8 @@
         }
 
         .ar-actions--grid .ar-button {
-          width: min(16vw, 14vh, 96px);
-          width: min(16vw, 14dvh, 96px);
+          width: min(24vw, 19vh, 130px);
+          width: min(24vw, 19dvh, 130px);
         }
 
         .site-footer {
@@ -335,6 +335,51 @@
 
         .footer-logo {
           width: 80px;
+        }
+      }
+
+      @media (orientation: portrait) {
+        .ar-actions--grid {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          max-width: 100%;
+        }
+      }
+
+      @media (orientation: landscape) {
+        .ar-actions {
+          flex-direction: row;
+          flex-wrap: nowrap;
+          justify-content: center;
+          gap: clamp(16px, 4vw, 44px);
+        }
+
+        .ar-actions--grid {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: center;
+          width: min(88vw, 720px);
+          max-width: min(88vw, 720px);
+        }
+
+        .ar-button,
+        .ar-actions--grid .ar-button {
+          width: min(30vw, 220px);
+        }
+      }
+
+      @media (max-width: 900px) and (orientation: landscape) {
+        .ar-actions {
+          gap: clamp(12px, 3vw, 28px);
+          margin-top: clamp(10px, 2.5vh, 18px);
+        }
+
+        .ar-button,
+        .ar-actions--grid .ar-button {
+          width: min(28vw, 40vh, 150px);
+          width: min(28vw, 40dvh, 150px);
         }
       }
     </style>

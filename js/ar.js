@@ -5,7 +5,7 @@ const fallbackPois = [
     id: "mura",
     enabled: true,
     targetIndex: 0,
-    video: "assets/videos/Mura.mp4",
+    video: "assets/videos/Mura_mobile.mp4",
     audio: {
       it: "assets/audio/mura_it.mp3",
       en: "assets/audio/mura_en.mp3"
@@ -19,7 +19,7 @@ const fallbackPois = [
     id: "capanna",
     enabled: true,
     targetIndex: 1,
-    video: "assets/videos/Capanna.mp4",
+    video: "assets/videos/Capanna_mobile.mp4",
     audio: {
       it: "assets/audio/capanna_it.mp3",
       en: "assets/audio/capanna_en.mp3"
