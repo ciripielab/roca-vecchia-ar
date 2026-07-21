@@ -6,6 +6,7 @@ const fallbackPois = [
     enabled: true,
     targetIndex: 0,
     video: "assets/videos/Mura_mobile.mp4",
+    overlayImage: "assets/overlays/mura_frame_mobile.png",
     audio: {
       it: "assets/audio/mura_it.mp3",
       en: "assets/audio/mura_en.mp3"
@@ -20,6 +21,7 @@ const fallbackPois = [
     enabled: true,
     targetIndex: 1,
     video: "assets/videos/Capanna_mobile.mp4",
+    overlayImage: "assets/overlays/capanna_frame_mobile.png",
     audio: {
       it: "assets/audio/capanna_it.mp3",
       en: "assets/audio/capanna_en.mp3"
@@ -82,11 +84,18 @@ const orientationMessage = document.querySelector("#orientation-message");
 const arAssets = document.querySelector("#ar-assets");
 const params = new URLSearchParams(window.location.search);
 const defaultVideoFrame = {
-  width: 0.78,
-  height: 0.439,
+  width: 1.00,
+  height: 0.5625,
   x: 0,
   y: 0,
-  z: 0.01
+  z: -0.20
+};
+const defaultOverlayFrame = {
+  width: 1,
+  height: 0.718,
+  x: 0,
+  y: 0,
+  z: 0.02
 };
 
 let language = "it";
@@ -98,6 +107,9 @@ let orientationBlocked = false;
 let arStarted = false;
 let poiVideo = null;
 let poiVideoPlane = null;
+let poiOverlayImage = null;
+let poiOverlayPlane = null;
+let poiOverlayReady = false;
 let poiAudio = null;
 let poiAudioPrimed = false;
 let poiAudioStarted = false;
@@ -131,7 +143,21 @@ function formatMessage(key, detail = "") {
     .replace("{detail}", detail || "-");
 }
 
+const hiddenStatusKeys = new Set([
+  "cameraReady",
+  "targetConfigured",
+  "targetFound",
+  "targetLost"
+]);
+
 function setStatus(key, detail = "") {
+  if (hiddenStatusKeys.has(key)) {
+    statusMessage.textContent = "";
+    statusMessage.hidden = true;
+    return;
+  }
+
+  statusMessage.hidden = false;
   statusMessage.textContent = formatMessage(key, detail);
 }
 
@@ -157,6 +183,35 @@ function getVideoFrameConfig(poi) {
   };
 }
 
+function getOverlayFrameConfig(poi) {
+  const frame =
+    poi && (poi.overlayFrame || poi.frameOverlayConfig || poi.maskFrame);
+
+  if (!frame) {
+    return defaultOverlayFrame;
+  }
+
+  return {
+    width: getFiniteNumber(frame.width, defaultOverlayFrame.width),
+    height: getFiniteNumber(frame.height, defaultOverlayFrame.height),
+    x: getFiniteNumber(frame.x, defaultOverlayFrame.x),
+    y: getFiniteNumber(frame.y, defaultOverlayFrame.y),
+    z: getFiniteNumber(frame.z, defaultOverlayFrame.z)
+  };
+}
+
+function getOverlayImageSource(poi) {
+  if (!poi) {
+    return "";
+  }
+
+  return (
+    getLocalizedValue(poi.overlayImage, language) ||
+    getLocalizedValue(poi.frameOverlay, language) ||
+    getLocalizedValue(poi.maskImage, language)
+  );
+}
+
 function makeSafeId(value) {
   return String(value || "poi").replace(/[^a-z0-9_-]/gi, "-");
 }
@@ -178,9 +233,27 @@ function pausePoiAudio() {
   }
 }
 
+function showPoiOverlay() {
+  if (!poiOverlayPlane || !poiOverlayReady) {
+    return;
+  }
+
+  const videoVisible = poiVideoPlane && poiVideoPlane.getAttribute("visible");
+
+  if (videoVisible !== true && videoVisible !== "true") {
+    return;
+  }
+
+  poiOverlayPlane.setAttribute("visible", "true");
+}
+
 function pausePoiVideo() {
   if (poiVideoPlane) {
     poiVideoPlane.setAttribute("visible", "false");
+  }
+
+  if (poiOverlayPlane) {
+    poiOverlayPlane.setAttribute("visible", "false");
   }
 
   if (poiVideo) {
@@ -239,6 +312,7 @@ async function playPoiVideo() {
     await poiVideo.play();
     poiVideoPlane.setAttribute("src", `#${poiVideo.id}`);
     poiVideoPlane.setAttribute("visible", "true");
+    showPoiOverlay();
     schedulePoiAudioStart();
   } catch (error) {
     console.warn("Impossibile riprodurre il video AR.", error);
@@ -272,6 +346,47 @@ function configureAudioTrack(safePoiId) {
 
   (arAssets || document.body).appendChild(poiAudio);
   poiAudio.load();
+}
+
+function configureFrameOverlay(safePoiId) {
+  const overlaySource = getOverlayImageSource(selectedPoi);
+
+  if (!overlaySource) {
+    return;
+  }
+
+  const frame = getOverlayFrameConfig(selectedPoi);
+  poiOverlayReady = false;
+
+  poiOverlayImage = new Image();
+  poiOverlayImage.crossOrigin = "anonymous";
+  poiOverlayImage.addEventListener("load", () => {
+    poiOverlayReady = true;
+    console.log("Overlay AR pronto", overlaySource);
+    showPoiOverlay();
+  });
+
+  poiOverlayImage.addEventListener("error", () => {
+    console.warn("Errore caricamento overlay AR", overlaySource);
+  });
+  poiOverlayImage.src = overlaySource;
+
+  poiOverlayPlane = document.createElement("a-plane");
+  poiOverlayPlane.id = `poi-overlay-frame-${safePoiId}`;
+  poiOverlayPlane.setAttribute("visible", "false");
+  poiOverlayPlane.setAttribute("position", `${frame.x} ${frame.y} ${frame.z}`);
+  poiOverlayPlane.setAttribute("rotation", "0 0 0");
+  poiOverlayPlane.setAttribute("width", frame.width);
+  poiOverlayPlane.setAttribute("height", frame.height);
+  poiOverlayPlane.setAttribute("material", "shader", "flat");
+  poiOverlayPlane.setAttribute("material", "src", overlaySource);
+  poiOverlayPlane.setAttribute("material", "transparent", true);
+  poiOverlayPlane.setAttribute("material", "alphaTest", 0.01);
+  poiOverlayPlane.setAttribute("material", "side", "double");
+  poiOverlayPlane.setAttribute("material", "depthTest", true);
+  poiOverlayPlane.setAttribute("material", "depthWrite", false);
+
+  targetEl.appendChild(poiOverlayPlane);
 }
 
 function configureVideoFrame() {
@@ -320,6 +435,7 @@ function configureVideoFrame() {
   (arAssets || sceneEl).appendChild(poiVideo);
   targetEl.appendChild(poiVideoPlane);
   poiVideo.load();
+  configureFrameOverlay(safePoiId);
   configureAudioTrack(safePoiId);
 }
 

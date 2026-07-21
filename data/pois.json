@@ -13,6 +13,7 @@
         "en": "The Walls"
       },
       "video": "assets/videos/Mura_mobile.mp4",
+      "overlayImage": "assets/overlays/mura_frame_mobile.png",
       "audio": {
         "it": "assets/audio/mura_it.mp3",
         "en": "assets/audio/mura_en.mp3"
@@ -31,6 +32,7 @@
         "en": "The Hut"
       },
       "video": "assets/videos/Capanna_mobile.mp4",
+      "overlayImage": "assets/overlays/capanna_frame_mobile.png",
       "audio": {
         "it": "assets/audio/capanna_it.mp3",
         "en": "assets/audio/capanna_en.mp3"
