@@ -462,6 +462,40 @@ async function primePoiAudio() {
   }
 }
 
+function getFullscreenElement() {
+  return (
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.msFullscreenElement ||
+    null
+  );
+}
+
+async function requestAppFullscreen() {
+  if (getFullscreenElement()) {
+    return true;
+  }
+
+  const element = document.documentElement;
+  const requestFullscreen =
+    element.requestFullscreen ||
+    element.webkitRequestFullscreen ||
+    element.msRequestFullscreen;
+
+  if (!requestFullscreen) {
+    console.info("Fullscreen API non disponibile in questo browser.");
+    return false;
+  }
+
+  try {
+    await requestFullscreen.call(element);
+    return true;
+  } catch (error) {
+    console.warn("Impossibile attivare la modalita fullscreen.", error);
+    return false;
+  }
+}
+
 function isMobileLikeDevice() {
   const isMobileUserAgent = /Android|iPhone|iPad|iPod/i.test(
     navigator.userAgent
@@ -678,7 +712,7 @@ startButton.addEventListener("click", async () => {
   setStatus("cameraStarting");
 
   try {
-    await primePoiAudio();
+    await Promise.allSettled([requestAppFullscreen(), primePoiAudio()]);
     await arSystem.start();
     arStarted = true;
   } catch (error) {
